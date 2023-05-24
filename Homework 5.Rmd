@@ -1,0 +1,119 @@
+---
+title: "Untitled"
+author: "William Yip"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: yes
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# should haves (from last week)
+library(tidyverse)
+library(here)
+library(janitor)
+library(ggeffects)
+library(performance)
+library(naniar) # or equivalent
+library(flextable) # or equivalent
+library(car)
+library(broom)
+# would be nice to have
+library(corrplot)
+library(AICcmodavg)
+library(GGally)
+```
+
+
+```{r}
+here("data", "knb-lter-hfr.109.18")
+```
+
+```{r}
+plant <- read_csv("~/github/ENVS-193DS_homework-05/data/knb-lter-hfr.109.18/hf109-01-sarracenia.csv") %>%
+  #make column names cleaner
+  clean_names() %>%
+  #selecting columns of interest
+  select(totmass, species, feedlevel, sla, chlorophyll, amass, num_lvs, num_phylls)
+
+```
+Visualizing the missing data:
+
+```{r}
+gg_miss_var(plant)
+
+#missing observations will be excluded
+```
+subsetting the data by dropping NAs:
+
+```{r subset-drop-NA}
+plant_subset <- plant %>%
+  drop_na(sla, chlorophyll, num_lvs, num_phylls, amass)
+```
+
+Create a correlation plot:
+
+Example writing: To determine the relationships between numerical values in our dataset, we calculated Pearsons r and visually represented correlation using a correlation plot.
+
+```{r}
+plant_cor <- plant_subset %>%
+  select(feedlevel:num_phylls) %>%
+  cor(method = "pearson")
+
+#create correlation plot
+corrplot(plant_cor, 
+         method = "ellipse",
+         addCoef.col = "black"
+         )
+
+```
+
+Create a plot of each variable compared against the others
+
+```{r pair-plot}
+plant_subset %>%
+  select(species:num_phylls) %>%
+  ggpairs()
+```
+
+Starting regression here:
+
+Example: To determine how species and physiological characteristics predict biomass, we fit multiple linear models. 
+
+```{r}
+null <- lm(totmass ~ 1, data = plant_subset) #start with nothing in there
+full <- lm(totmass ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset) #everything in there
+```
+
+We visually assess normality and homeoelasticity of residuals using diagnostic plot for the full model
+```{r full-diagnosis}
+par(mfrow = c(2,2))
+plot(full)
+
+```
+
+We also tested for normality and heteroscedasticity using the Shapiro-Wilk test (null hypothesis: variable of interest (i.e the residuals) are normally distributed). 
+
+We tested for heteroskedaslicity using the Breush-Pagan test (null hypothesis: variable of interst has constant variance)
+```{r}
+check_normality(full)
+check_heteroscedasticity(full)
+```
+
+This dataset does not conform to the assumptions of linear regression (normal for bio datasets)
+Use a log10 of each observation to transform the resposne variable to transform residuals to normal
+
+```{r}
+full_log <- lm(log(totmass) ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
+
+plot(full_log)
+check_normality(full_log)
+check_heteroskedasticity(full_log)
+```
