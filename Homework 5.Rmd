@@ -77,7 +77,7 @@ corrplot(plant_cor,
 
 Create a plot of each variable compared against the others
 
-```{r pair-plot}
+```{r pair-plot, message = FALSE}
 plant_subset %>%
   select(species:num_phylls) %>%
   ggpairs()
@@ -102,7 +102,7 @@ plot(full)
 We also tested for normality and heteroscedasticity using the Shapiro-Wilk test (null hypothesis: variable of interest (i.e the residuals) are normally distributed). 
 
 We tested for heteroskedaslicity using the Breush-Pagan test (null hypothesis: variable of interst has constant variance)
-```{r}
+```{r, warning = FALSE, message = FALSE}
 check_normality(full)
 check_heteroscedasticity(full)
 ```
@@ -117,3 +117,84 @@ plot(full_log)
 check_normality(full_log)
 check_heteroskedasticity(full_log)
 ```
+
+```{r}
+null_log <- lm(log(totmass) ~ 1, data = plant_subset)
+full_log <- lm(log(totmass) ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
+
+plot(full_log)
+check_normality(full_log)
+check_heteroscedasticity(full_log)
+
+```
+
+evaluate multicollinearity
+
+```{r}
+
+```
+
+We evaluated multicollinearity by calculating genrealized variance inflation factor and determined that the model did not display multicollinearity 
+
+try some more models:
+
+addressing the question: what set of predictor variables best explains the response? (secondary question that goes along with linear regression)
+
+```{r}
+model2_log <- lm(log(totmass) ~ species, data = plant_subset)
+```
+
+check assumptions for model 2:
+```{r}
+plot(model2_log)
+
+check_normality(model2_log)
+check_heteroskedasticity(model2_log)
+
+#always check new models fit assumptions of linear regression
+```
+
+Compare models using Akaline's Information criterion values:
+look for simplest model that explains the most variance
+```{r}
+AICc(full_log)
+AICc(model2_log)
+AICc(null_log)
+
+MuMIn::AICc(full_log, model2_log, null_log)
+MuMIn:model_sel(full_log, model2_log, null_log)
+```
+difference in AIC numbers between models
+Based on these values, the least complex model that predicts the most variance is the full model because it has the lowest AIC
+
+We found that the _ model inclduing ___ predictors best predicted (model summary) degree of freedom, test
+
+```{r}
+summary(full_log)
+
+table <- tidy(full_log, conf.int = TRUE) %>%
+  # change the p-value numbers if they're really small
+  # change the estimates, standard error, and t-statistics to round to _ digits
+  # 
+  flextable() %>%
+  autofit()
+
+table 
+```
+use ggpredict() to backtransform estimates
+```{r}
+model_pred <- ggpredict(full_log, terms = "species", back.transform = TRUE)
+
+plot(ggpredict(full_log, terms = "species", back.transform = TRUE), add.data = TRUE)
+
+plot(ggpredict(full_log, terms = "chlorophyll", back.transform = TRUE), add.data = TRUE)
+
+plot(ggpredict(full_log, terms = "sla", back.transform = TRUE), add.data = TRUE)
+
+model_pred
+```
+constant level displayed
+
+
+## different types of ANOVA 
+type 1: the order of the variables matter
