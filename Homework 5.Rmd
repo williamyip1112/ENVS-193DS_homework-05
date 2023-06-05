@@ -3,11 +3,11 @@ title: "Untitled"
 author: "William Yip"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     toc: yes
-    code_folding: hide
+    code_folding: show
+  pdf_document:
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -44,6 +44,11 @@ plant <- read_csv("~/github/ENVS-193DS_homework-05/data/knb-lter-hfr.109.18/hf10
   select(totmass, species, feedlevel, sla, chlorophyll, amass, num_lvs, num_phylls)
 
 ```
+## Introduction
+
+
+## Methods
+
 Visualizing the missing data:
 
 ```{r}
@@ -101,18 +106,19 @@ plot(full)
 
 We also tested for normality and heteroscedasticity using the Shapiro-Wilk test (null hypothesis: variable of interest (i.e the residuals) are normally distributed). 
 
-We tested for heteroskedaslicity using the Breush-Pagan test (null hypothesis: variable of interst has constant variance)
+We tested for heteroskedaslicity using the 
 ```{r, warning = FALSE, message = FALSE}
 check_normality(full)
 check_heteroscedasticity(full)
 ```
 
 This dataset does not conform to the assumptions of linear regression (normal for bio datasets)
-Use a log10 of each observation to transform the resposne variable to transform residuals to normal
+Use a log10 of each observation to transform the response variable to transform residuals to normal
 
 ```{r}
 full_log <- lm(log(totmass) ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
 
+par(mfrow = c(2,2))
 plot(full_log)
 check_normality(full_log)
 check_heteroskedasticity(full_log)
@@ -122,6 +128,7 @@ check_heteroskedasticity(full_log)
 null_log <- lm(log(totmass) ~ 1, data = plant_subset)
 full_log <- lm(log(totmass) ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
 
+par(mfrow = c(2,2))
 plot(full_log)
 check_normality(full_log)
 check_heteroscedasticity(full_log)
@@ -129,12 +136,11 @@ check_heteroscedasticity(full_log)
 ```
 
 evaluate multicollinearity
-
 ```{r}
-
+vif(full_log)
 ```
 
-We evaluated multicollinearity by calculating genrealized variance inflation factor and determined that the model did not display multicollinearity 
+We evaluated multicollinearity by calculating generalized variance inflation factor and determined that the model did not display multicollinearity 
 
 try some more models:
 
@@ -142,10 +148,13 @@ addressing the question: what set of predictor variables best explains the respo
 
 ```{r}
 model2_log <- lm(log(totmass) ~ species, data = plant_subset)
+model3_log <- lm(log(totmass) ~ species + chlorophyll, data = plant_subset)
+model4_log <- lm(log(totmass) ~ feedlevel + species, data = plant_subset)
 ```
 
 check assumptions for model 2:
 ```{r}
+par(mfrow = c(2,2))
 plot(model2_log)
 
 check_normality(model2_log)
@@ -154,20 +163,42 @@ check_heteroskedasticity(model2_log)
 #always check new models fit assumptions of linear regression
 ```
 
+check assumptions for model 3:
+```{r}
+par(mfrow = c(2,2))
+plot(model3_log)
+
+check_normality(model3_log)
+check_heteroskedasticity(model3_log)
+```
+
+check assumptions for model 4:
+```{r}
+par(mfrow = c(2,2))
+plot(model4_log)
+
+check_normality(model4_log)
+check_heteroskedasticity(model4_log)
+```
+
 Compare models using Akaline's Information criterion values:
 look for simplest model that explains the most variance
 ```{r}
 AICc(full_log)
 AICc(model2_log)
 AICc(null_log)
+AICc(model3_log)
+AICc(model4_log)
 
-MuMIn::AICc(full_log, model2_log, null_log)
-MuMIn:model_sel(full_log, model2_log, null_log)
 ```
 difference in AIC numbers between models
 Based on these values, the least complex model that predicts the most variance is the full model because it has the lowest AIC
 
-We found that the _ model inclduing ___ predictors best predicted (model summary) degree of freedom, test
+We took 8 different species of sarracenia and assigned 2 plants from each species group and assigned them different feeding levels from one to six. These levels were determined by the various weights of finely ground wasps that were fed to the plants. 0-0.25g for small species, 0-0.5g for medium species, and 0-1g for large species. Total biomass, chlorophyll content, total number of pitchers and phyllodes are measured after the feeding period. We collected our data by measuring the physiological and morphological attributes of the sarracenia and input the data into a dataset that we called plants. As shown in figure 1, there seems to be a significant number of missing data in our original dataset. More importantly, the variables that have missing data are potential predictors that we may use for creating models. We subset the plant dataset to eliminate the missing data. As shown in figure 2, we calculated Pearson’s correlation to determine relationships between numerical values in our dataset. We found that there was a mix of positive and negative correlations between variables, however, all of these correlations were weak. The strongest correlation was between photosynthetic rate and specific leaf area at 0.32 which is still considered a weak correlation. As shown in figure 3, we visually assessed the relationships between variables using figure 3. We found that there were some variables that had a significant but weak Pearson’s correlation while there seemed to be no relationship between variables based on visual assessment of the density plot and scatterplot. In order for us to determine how species and physiological characteristics predict biomass, we fit multiple linear models. We create a null model where we do not have any predictor variables and we also create a full model where we include all the predictor variables. These variables are: species, chlorophyll content, grams of ground Hymenoptera fed per week, specific leaf area, total number of pitchers, and the total number of phyllodes produced.As shown in figure 4, we visually assessed the normality and homoskestacitiy of residuals using a series of diagnostic plot for the full model.  We found that the visual assumption check of the plots show that the model does not conform to linearity or normality. We also used the Shapiro-Wilk test (null hypothesis: variable of interest (i.e the residuals) are normally distributed) to test normality and the Breush-Pagan test (null hypothesis: variable of interest has constant variance) to test for heteroskedacity. We found that the model had non-normality of residuals and heteroscadacity which means it does not conform to the assumptions of linear regression. We used a log transformation for the models because we wanted them to conform to the assumptions of linear regression. We evaluated multicollinearity by calculating the generalized variance inflation factor and determined that the model did not display multicollinearity. This is because the generalized variance inflation factor values were all below 5 which indicates that there was no multicollinearity in the model. To compare the models that we created, we used Alkaline’s Information criterion (AIC) values to determine which model was the best one. The AIC values tell us which model is the least complex model that predicts the most variance. 
+
+ 
+## Results
+
 
 ```{r}
 summary(full_log)
@@ -181,20 +212,13 @@ table <- tidy(full_log, conf.int = TRUE) %>%
 
 table 
 ```
+
 use ggpredict() to backtransform estimates
 ```{r}
 model_pred <- ggpredict(full_log, terms = "species", back.transform = TRUE)
 
 plot(ggpredict(full_log, terms = "species", back.transform = TRUE), add.data = TRUE)
 
-plot(ggpredict(full_log, terms = "chlorophyll", back.transform = TRUE), add.data = TRUE)
-
-plot(ggpredict(full_log, terms = "sla", back.transform = TRUE), add.data = TRUE)
-
 model_pred
 ```
-constant level displayed
 
-
-## different types of ANOVA 
-type 1: the order of the variables matter
