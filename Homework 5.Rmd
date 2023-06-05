@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Homework 5"
 author: "William Yip"
 date: "`r Sys.Date()`"
 output:
@@ -14,7 +14,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 # should haves (from last week)
 library(tidyverse)
 library(here)
@@ -36,7 +36,7 @@ library(GGally)
 here("data", "knb-lter-hfr.109.18")
 ```
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 plant <- read_csv("~/github/ENVS-193DS_homework-05/data/knb-lter-hfr.109.18/hf109-01-sarracenia.csv") %>%
   #make column names cleaner
   clean_names() %>%
@@ -48,14 +48,14 @@ plant <- read_csv("~/github/ENVS-193DS_homework-05/data/knb-lter-hfr.109.18/hf10
 Sarracenia, commonly known as pitcher plants, are carnivorous plants that mainly consume small prey like flies, ants, bees, and even snails. They are native to northeastern North America and are the largest group of carnivorous plants in the world. Sarracenia is already rare in the plant kingdom with them being carnivores which give us better insight into plant evolution. Sarracenia has also been found to be useful for medicinal purposes. The roots of Sarracenia contain high levels of anticancer activities, antioxidation capacity, and antibacterial activities (Huang et al., 2022). The leaf extract of Sarracenia has also been used to treat type II diabetes (Leduc et al., 2005). Understanding how we can predict their biomass from their physiological traits can help us find ways to conserve them by ensuring that they have the conditions to grow to the right biomass. This is important because the biomass of sarracenia has been found to be a significant determinant of their prey capture ability (Bhattari and Horner, 2009). The objective is for us to understand how sarracenia physiology data can be used to predict their individual biomass. We hypothesize that the sarracenia species, feed level, and chlorophyll content are predictors of individual biomass.
 
 ## Methods
-We took 8 different species of sarracenia and assigned 2 plants from each species group and assigned them different feeding levels from one to six. These levels were determined by the various weights of finely ground wasps that were fed to the plants. 0-0.25g for small species, 0-0.5g for medium species, and 0-1g for large species. Total biomass, chlorophyll content, total number of pitchers and phyllodes are measured after the feeding period. We collected our data by measuring the physiological and morphological attributes of the sarracenia and input the data into a dataset that we called plants. As shown in figure 1, there seems to be a significant number of missing data in our original dataset. More importantly, the variables that have missing data are potential predictors that we may use for creating models. We subset the plant dataset to eliminate the missing data. As shown in figure 2, we calculated Pearson’s correlation to determine relationships between numerical values in our dataset. We found that there was a mix of positive and negative correlations between variables, however, all of these correlations were weak. The strongest correlation was between photosynthetic rate and specific leaf area at 0.32 which is still considered a weak correlation. As shown in figure 3, we visually assessed the relationships between variables using figure 3. We found that there were some variables that had a significant but weak Pearson’s correlation while there seemed to be no relationship between variables based on visual assessment of the density plot and scatterplot. In order for us to determine how species and physiological characteristics predict biomass, we fit multiple linear models. We create a null model where we do not have any predictor variables and we also create a full model where we include all the predictor variables. These variables are: species, chlorophyll content, grams of ground Hymenoptera fed per week, specific leaf area, total number of pitchers, and the total number of phyllodes produced.As shown in figure 4, we visually assessed the normality and homoskestacitiy of residuals using a series of diagnostic plot for the full model.  We found that the visual assumption check of the plots show that the model does not conform to linearity or normality. We also used the Shapiro-Wilk test (null hypothesis: variable of interest (i.e the residuals) are normally distributed) to test normality and the Breush-Pagan test (null hypothesis: variable of interest has constant variance) to test for heteroskedacity. We found that the model had non-normality of residuals and heteroscadacity which means it does not conform to the assumptions of linear regression. We used a log transformation for the models because we wanted them to conform to the assumptions of linear regression. We evaluated multicollinearity by calculating the generalized variance inflation factor and determined that the model did not display multicollinearity. This is because the generalized variance inflation factor values were all below 5 which indicates that there was no multicollinearity in the model. To compare the models that we created, we used Alkaline’s Information criterion (AIC) values to determine which model was the best one. The AIC values tell us which model is the least complex model that predicts the most variance. 
+We took 8 different species of sarracenia and assigned 2 plants from each species group and assigned them different feeding levels from one to six. These levels were determined by the various weights of finely ground wasps that were fed to the plants. 0-0.25g for small species, 0-0.5g for medium species, and 0-1g for large species. Total biomass, chlorophyll content, total number of pitchers and phyllodes are measured after the feeding period. We collected our data by measuring the physiological and morphological attributes of the sarracenia and input the data into a dataset that we called plants. As shown in figure 1, there seems to be a significant number of missing data in our original dataset. More importantly, the variables that have missing data are potential predictors that we may use for creating models. We subset the plant dataset to eliminate the missing data. As shown in figure 2, we calculated Pearson’s correlation to determine relationships between numerical values in our dataset. We found that there was a mix of positive and negative correlations between variables, however, all of these correlations were weak. The strongest correlation was between photosynthetic rate and specific leaf area at 0.32 which is still considered a weak correlation. As shown in figure 3, we visually assessed the relationships between variables using figure 3. We found that there were some variables that had a significant but weak Pearson’s correlation while there seemed to be no relationship between variables based on visual assessment of the density plot and scatterplot. In order for us to determine how species and physiological characteristics predict biomass, we fit multiple linear models. We create a null model where we do not have any predictor variables and we also create a full model where we include all the predictor variables. These variables are: species, chlorophyll content, grams of ground Hymenoptera fed per week, specific leaf area, total number of pitchers, and the total number of phyllodes produced. As shown in figure 4, we visually assessed the normality and homoskestacitiy of residuals using a series of diagnostic plot for the full model.  We found that the visual assumption check of the plots show that the model does not conform to linearity or normality. We also used the Shapiro-Wilk test (null hypothesis: variable of interest (i.e the residuals) are normally distributed) to test normality and the Breush-Pagan test (null hypothesis: variable of interest has constant variance) to test for heteroskedacity. We found that the model had non-normality of residuals and heteroscadacity which means it does not conform to the assumptions of linear regression. We used a log10 of each observation to transform the response variable. This transform residuals to normal and allows it to conform to the assumptions of linear regression. We evaluated multicollinearity of the full model by calculating the generalized variance inflation factor and determined that the model did not display multicollinearity. This is because the generalized variance inflation factor values were all below 5 which indicates that there was no multicollinearity in the model. We then made 3 additional models to compare to the null and full models. For model 2, we choose the predictor variable of species because it was reasonable to believe that different species of Sarrencia grow to different sizes. Different species of Sarrencia likely grow in different regions or have different adaptations that can result in biomass that differ from other species. For model 3, We choose the predictors variables of species and chlorophyll content. The species variable was chosen because we used it as a predictor in our previous model and wanted to build on it.  We also look at the predictor variable chlorophyll content because it indicates how much energy the plants can obtain through photosynthesis which could potentially correlate to biomass. For model 4, We choose the predictor variables of species and feed level. Again, the species variable was chosen for us to build upon it. We also choose the predictor variable feed level which is the grams of finely ground wasps that are fed to the sarrencia. This is because we assume that higher feed levels will result in larger biomass. To compare the models that we created, we used Alkaline’s Information criterion (AIC) values to determine which model was the best one. The AIC values tell us which model is the least complex model that predicts the most variance. 
+
 
 ```{r}
 gg_miss_var(plant)
-
-#missing observations will be excluded
 ```
-**Figure 1**. Visualization of missing observations in plant dataset. 
+
+**Figure 1.** Visualization of missing observations in plant dataset. 
 Variables are shown on the y-axis and the number of data missing is shown on the x-axis. The lines and dots represent how many missing observations are in each variable.
 
 ```{r subset-drop-NA}
@@ -76,7 +76,8 @@ corrplot(plant_cor,
          )
 
 ```
-**Figure 2** Pearson’s correlation between predictor variables. 
+
+**Figure 2.** Pearson’s correlation between predictor variables. 
 The scale on the right indicates the strength of correlation and each cell has color shading to indicate the strength of correlation. Blue represents a positive correlation and red represents a negative correlation.  The diagonals represent the correlation between the same variables.
 
 
@@ -85,41 +86,49 @@ plant_subset %>%
   select(species:num_phylls) %>%
   ggpairs()
 ```
-**Figure 3** Relationships between variables. 
+
+**Figure 3.** Relationships between variables. 
 Density plot are shown along the diagonal and below the diagonal are scatterplots. Above the diagonal, there are Pearson’s correlations and the asterisks indicate significant relationships between variables. The bar plot at the top left shows the frequency of each species and the boxplot along the top line show the quantitative variable compared with the categorical variable species. 
  
 
 ```{r}
+#create null and full model
 null <- lm(totmass ~ 1, data = plant_subset) #start with nothing in there
 full <- lm(totmass ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset) #everything in there
 ```
 
-We visually assess normality and homeoelasticity of residuals using diagnostic plot for the full model
+
 ```{r full-diagnosis}
+#create plots for visual assessment
 par(mfrow = c(2,2))
 plot(full)
 
 ```
 
-We also tested for normality and heteroscedasticity using the Shapiro-Wilk test (null hypothesis: variable of interest (i.e the residuals) are normally distributed). 
+**Figure 4.** Assumption checks for the full model. 
+Four plots used to determine the normality of full mode. Residual vs Fitted show residuals on y-axis and fitted values on x-axis. Normal Q-Q plot had standardized residuals on the y-axis and theoretical quantities on the x-axis. Scale-location show the square root of standardized residuals on the y-axis and fitted values on the x-axis. Residuals vs leverage show standardized residuals on the y-axis, leverage on x-axis, and cooke’s distance represented by dotted lines. 
 
-We tested for heteroskedaslicity using the 
 ```{r, warning = FALSE, message = FALSE}
 check_normality(full)
 check_heteroscedasticity(full)
 ```
 
-This dataset does not conform to the assumptions of linear regression (normal for bio datasets)
-Use a log10 of each observation to transform the response variable to transform residuals to normal
 
 ```{r}
 full_log <- lm(log(totmass) ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
 
 par(mfrow = c(2,2))
 plot(full_log)
+```
+
+**Figure 5.** Assumption checks for the full log model. 
+Four plots used to determine the normality of full mode. Residual vs Fitted show residuals on y-axis and fitted values on x-axis. Normal Q-Q plot had standardized residuals on the y-axis and theoretical quantities on the x-axis. Scale-location show the square root of standardized residuals on the y-axis and fitted values on the x-axis. Residuals vs leverage show standardized residuals on the y-axis, leverage on x-axis, and cooke’s distance represented by dotted lines.
+
+```{r}
 check_normality(full_log)
 check_heteroskedasticity(full_log)
 ```
+
 
 ```{r}
 null_log <- lm(log(totmass) ~ 1, data = plant_subset)
@@ -132,16 +141,13 @@ check_heteroscedasticity(full_log)
 
 ```
 
-evaluate multicollinearity
+
 ```{r}
+#evaluate multicollinearity
 vif(full_log)
 ```
 
-We evaluated multicollinearity by calculating generalized variance inflation factor and determined that the model did not display multicollinearity 
 
-try some more models:
-
-addressing the question: what set of predictor variables best explains the response? (secondary question that goes along with linear regression)
 
 ```{r}
 model2_log <- lm(log(totmass) ~ species, data = plant_subset)
@@ -149,38 +155,56 @@ model3_log <- lm(log(totmass) ~ species + chlorophyll, data = plant_subset)
 model4_log <- lm(log(totmass) ~ feedlevel + species, data = plant_subset)
 ```
 
-check assumptions for model 2:
+
 ```{r}
+#check assumptions for model 2
 par(mfrow = c(2,2))
 plot(model2_log)
+```
 
+**Figure 6.** Assumption checks for model 2. 
+Four plots used to determine the normality of full mode. Residual vs Fitted show residuals on y-axis and fitted values on x-axis. Normal Q-Q plot had standardized residuals on the y-axis and theoretical quantities on the x-axis. Scale-location show the square root of standardized residuals on the y-axis and fitted values on the x-axis. Residuals vs leverage show standardized residuals on the y-axis, leverage on x-axis, and cooke’s distance represented by dotted lines.
+
+```{r}
 check_normality(model2_log)
 check_heteroskedasticity(model2_log)
 
-#always check new models fit assumptions of linear regression
 ```
 
-check assumptions for model 3:
+
+
 ```{r}
+#check assumptions for model 3
 par(mfrow = c(2,2))
 plot(model3_log)
+```
 
+**Figure 7.** Assumption checks for model 3.
+Four plots used to determine the normality of full mode. Residual vs Fitted show residuals on y-axis and fitted values on x-axis. Normal Q-Q plot had standardized residuals on the y-axis and theoretical quantities on the x-axis. Scale-location show the square root of standardized residuals on the y-axis and fitted values on the x-axis. Residuals vs leverage show standardized residuals on the y-axis, leverage on x-axis, and cooke’s distance represented by dotted lines.
+
+```{r}
 check_normality(model3_log)
 check_heteroskedasticity(model3_log)
 ```
 
-check assumptions for model 4:
+
 ```{r}
+#check assumptions for model 4
 par(mfrow = c(2,2))
 plot(model4_log)
 
+```
+
+**Figure 8.** Assumption checks for model 4. Four plots used to determine the normality of full mode. Residual vs Fitted show residuals on y-axis and fitted values on x-axis. Normal Q-Q plot had standardized residuals on the y-axis and theoretical quantities on the x-axis. Scale-location show the square root of standardized residuals on the y-axis and fitted values on the x-axis. Residuals vs leverage show standardized residuals on the y-axis, leverage on x-axis, and cooke’s distance represented by dotted lines.
+```{r}
 check_normality(model4_log)
 check_heteroskedasticity(model4_log)
 ```
 
-Compare models using Akaline's Information criterion values:
-look for simplest model that explains the most variance
+
+
 ```{r}
+#Compare models using Akaline's Information criterion values
 AICc(full_log)
 AICc(model2_log)
 AICc(null_log)
@@ -188,7 +212,6 @@ AICc(model3_log)
 AICc(model4_log)
 
 ```
-
 
 ## Results
 
@@ -201,21 +224,25 @@ summary(full_log)
 table <- tidy(full_log, conf.int = TRUE) %>%
   # change the p-value numbers if they're really small
   # change the estimates, standard error, and t-statistics to round to _ digits
-  # 
   flextable() %>%
   autofit()
 
 table 
 ```
 
-use ggpredict() to backtransform estimates
+
 ```{r}
+#use ggpredict() to backtransform estimates
+
 model_pred <- ggpredict(full_log, terms = "species", back.transform = TRUE)
 
 plot(ggpredict(full_log, terms = "species", back.transform = TRUE), add.data = TRUE)
 
 model_pred
 ```
+
+**Figure 9.** Species as a predictor of total biomass. 
+Vertical lines represent the error bars and the dark-shaded dots are the mean biomass values of each species. The light-shaded dots are all the different biomass values for each species.
 
 ## Bibliograhy
 
